@@ -11,17 +11,16 @@
     "go",
     "golang",
     "wasm",
-    "webassembly",
+    "webAssembly",
     "webpack"
   ],
   "author": "Aaron Powell",
   "license": "MIT",
   "devDependencies": {
-    "@types/webassembly-js-api": "0.0.2",
-    "typescript": "^3.2.4"
-  },
-  "dependencies": {
-    "@types/webpack": "^4.4.23"
+    "typescript": "^3.2.4",
+    "@types/loader-utils": "^2.0.1",
+    "@types/webpack": "^4.41.22",
+    "webpack": "^4.44.1"
   },
   "peerDependencies": {
     "webpack": "^4.29.0"

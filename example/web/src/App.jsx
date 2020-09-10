@@ -25,7 +25,9 @@ class App extends React.Component {
     async updateValue(index, value) {
         let newValues = this.state.value.slice();
         newValues[index] = value
+        console.log(...newValues);
         let result = await add(...newValues);
+        console.log(result);
         this.setState({ value: newValues, result });
     }
 

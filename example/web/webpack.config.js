@@ -23,6 +23,7 @@ module.exports = {
     extensions: [".go", ".jsx", ".js", ".json"]
   },
   module: {
+    noParse: /wasm_exec\.js$/,
     rules: [
       {
         test: /\.jsx?$/,
@@ -30,10 +31,13 @@ module.exports = {
         use: ["source-map-loader", "babel-loader"]
       },
       {
-        test: /\.go/,
+        test: /\.go$/,
         use: [
           {
-            loader: path.join(__dirname, "..", "..", "dist", "index.js")
+            loader: path.join(__dirname, "..", "..", "dist", "index.js"),
+            options: {
+              filename: '[name]-[contenthash].[ext]'
+            }
           }
         ]
       },
