@@ -1,7 +1,3 @@
-[![Build Status][build]][build-url]
-[![npm][npm]][npm-url]
-[![node][node]][node-url]
-
 <div align="center">
   <a href="https://github.com/webpack/webpack">
     <img width="200" height="200"
@@ -11,17 +7,15 @@
   <p>Generates a WASM package from Golang and provides an async interface for working with it</p>
 </div>
 
-<h2 align="center">Install</h2>
-
-```bash
-npm install --save-dev golang-wasm-async-loader
-```
+## TODO
+- [ ] emit file support hash and publicPath
+- [ ] hide system path while require wasm_exec.js
+- [ ] add unit test
+- [ ] release a beta version
 
 This is a loader for [webpack](https://webpack.js.org/) that is used for generating [WebAssembly](https://webassembly.org/) (aka WASM) bundles from [Go](https://golang.org).
 
 The JavaScript bridge that is then generated for webpack will expose the WebAssembly functions as a Promise for interacting with.
-
-Note: It works with `Go 1.12` for now. Stay tuned for updates :)
 
 ## webpack config
 
@@ -29,6 +23,7 @@ Note: It works with `Go 1.12` for now. Stay tuned for updates :)
 module.exports = {
     ...
     module: {
+        noParse: /wasm_exec\.js$/,
         rules: [
             {
                 test: /\.go/,
@@ -107,20 +102,3 @@ In JavaScript a global object is registered as `__gobridge__` which the registra
 ## Example
 
 You'll find an example of this in action in the [`example`](https://github.com/aaronpowell/webpack-golang-wasm-async-loader/tree/master/example) folder.
-
-# Licence
-
-MIT
-
-# Credit
-
-Aaron Powell
-
-[build]: https://aaronpowell.visualstudio.com/webpack-golang-wasm-async-loader/_apis/build/status/aaronpowell.webpack-golang-wasm-async-loader?branchName=master&label=Built%20on%20Azure%20🐱%E2%80%8D💻
-[build-url]: https://aaronpowell.visualstudio.com/webpack-golang-wasm-async-loader/_build/latest?definitionId=16?branchName=master
-
-[npm]: https://img.shields.io/npm/v/golang-wasm-async-loader.svg
-[npm-url]: https://npmjs.com/package/golang-wasm-async-loader
-
-[node]: https://img.shields.io/node/v/golang-wasm-async-loader.svg
-[node-url]: https://nodejs.org
