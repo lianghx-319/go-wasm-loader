@@ -11,7 +11,7 @@ module.exports = {
   mode: "development",
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "bundle.js"
+    filename: "bundle.js",
   },
   devServer: {
     contentBase: path.join(__dirname, "dist"),
@@ -36,7 +36,7 @@ module.exports = {
           {
             loader: path.join(__dirname, "..", "..", "dist", "index.js"),
             options: {
-              filename: '[name]-[contenthash].[ext]'
+              name: '[name].[contenthash:6].[ext]'
             }
           }
         ]
