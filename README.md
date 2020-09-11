@@ -8,8 +8,9 @@
 </div>
 
 ## TODO
+- [ ] validate options schema
 - [ ] add unit test
-- [ ] release a beta version
+- [ ] use go mod to manage gobridge
 
 This is a loader for [webpack](https://webpack.js.org/) that is used for generating [WebAssembly](https://webassembly.org/) (aka WASM) bundles from [Go](https://golang.org).
 
