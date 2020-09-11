@@ -36,7 +36,8 @@ module.exports = {
           {
             loader: path.join(__dirname, "..", "..", "dist", "index.js"),
             options: {
-              name: '[name].[contenthash:6].[ext]'
+              name: '[name].[contenthash:6].[ext]',
+              outputPath: 'static'
             }
           }
         ]

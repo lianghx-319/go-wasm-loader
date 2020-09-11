@@ -1,9 +1,9 @@
-import { join, resolve } from 'path';
-import { getOptions, interpolateName, OptionObject } from 'loader-utils';
-import * as webpack from 'webpack';
-import { readFileSync, unlinkSync } from 'fs'
-import { spawn, execFile } from 'child_process'
-// import validateOptions from 'schema-utils'
+import { join, resolve, posix } from "path";
+import { getOptions, interpolateName, OptionObject, stringifyRequest } from "loader-utils";
+import * as webpack from "webpack";
+import { readFileSync, unlinkSync, linkSync, existsSync } from "fs"
+import { spawn, execFile } from "child_process"
+// import validateOptions from "schema-utils"
 
 export interface loaderOptions {
   root: string, // default process.env.GOROOT
@@ -15,8 +15,9 @@ export interface loaderOptions {
 
 export default function (this: webpack.loader.LoaderContext, content: string) {
   const callback = this.async() as webpack.loader.loaderCallback;
+  const copyWasmExecPath = join(__dirname, "../dist/wasm_exec.js");
 
-  (async function (ctx) {
+  ;(async function (ctx) {
     const [
       goPath,
       {
@@ -24,12 +25,17 @@ export default function (this: webpack.loader.LoaderContext, content: string) {
         wasmExecPath,
         bridge,
         context = ctx.rootContext,
-        // outputPath,
+        outputPath,
         name = "[contenthash].[ext]"
       }
-    ] = await Promise.all([getGoEnv('GOPATH'), getLoaderOptions(ctx)])
+    ] = await Promise.all([getGoEnv("GOPATH"), getLoaderOptions(ctx)])
+
+    if (!existsSync(copyWasmExecPath)) {
+      linkSync(wasmExecPath, copyWasmExecPath);
+    }
+
     const outFile = `${ctx.resourcePath}.wasm`;
-    const goBin = join(root, 'bin/go');
+    const goBin = join(root, "bin/go");
     const args = ["build", "-o", outFile, ctx.resourcePath];
     const processOpts = {
       env: {
@@ -48,17 +54,28 @@ export default function (this: webpack.loader.LoaderContext, content: string) {
       content,
     });
 
+    let outPath = url;
+
+    if (outputPath) {
+      if (typeof outputPath === 'function') {
+        outPath = outputPath(url, ctx.resourcePath, context);
+      } else {
+        outPath = posix.join(outputPath, url);
+      }
+    }
+
     try {
       await compileWasm(goBin, args, processOpts)
     } catch (error) {
       console.trace(error);
       throw error;
     }
+
     const out = readFileSync(outFile);
     unlinkSync(outFile);
-    
+
     // const emittedFilename = basename(ctx.resourcePath, ".go") + ".wasm";
-    const emittedFilename = url.replace(/\.go$/, '.wasm');
+    const emittedFilename = outPath.replace(/\.go$/, ".wasm");
     const publicPath = `__webpack_public_path__ + ${JSON.stringify(emittedFilename)}`;
     // @ts-ignore
     ctx.emitFile(emittedFilename, out, null, { immutable });
@@ -66,12 +83,12 @@ export default function (this: webpack.loader.LoaderContext, content: string) {
     callback(
       null,
       [
-        "require('!",
-        wasmExecPath,
-        "');",
-        "import gobridge from '",
-        bridge,
-        "';",
+        "require(",
+        stringifyRequest(ctx, copyWasmExecPath),
+        ");",
+        "import gobridge from ",
+        stringifyRequest(ctx, bridge),
+        ";",
         proxyBuilder(publicPath)
       ].join("")
     );
@@ -80,11 +97,10 @@ export default function (this: webpack.loader.LoaderContext, content: string) {
 
 async function getLoaderOptions(context: webpack.loader.LoaderContext): Promise<loaderOptions & OptionObject> {
   const options = getOptions(context);
-  const goRoot = await getGoEnv('GOROOT');
-
+  const goRoot = await getGoEnv("GOROOT");
   return {
     root: goRoot,
-    wasmExecPath: resolve(goRoot, 'misc/wasm/wasm_exec.js'),
+    wasmExecPath: resolve(goRoot, "misc/wasm/wasm_exec.js"),
     bridge: join(__dirname, "..", "dist", "gobridge.js"),
     ...options,
   }
@@ -92,13 +108,13 @@ async function getLoaderOptions(context: webpack.loader.LoaderContext): Promise<
 
 function getGoEnv(name: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const ls = spawn('go', ['env', name]);
-    ls.stdout.on('data', (buf: Buffer) => {
-      const [ret] = buf.toString().split('\n')
+    const ls = spawn("go", ["env", name]);
+    ls.stdout.on("data", (buf: Buffer) => {
+      const [ret] = buf.toString().split("\n")
       resolve(ret);
     })
 
-    ls.stderr.on('data', (data) => {
+    ls.stderr.on("data", (data) => {
       reject(new Error(`Child Process getGoRoot error: ${data}`));
     });
   })

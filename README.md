@@ -8,8 +8,6 @@
 </div>
 
 ## TODO
-- [ ] emit file support hash and publicPath
-- [ ] hide system path while require wasm_exec.js
 - [ ] add unit test
 - [ ] release a beta version
 
