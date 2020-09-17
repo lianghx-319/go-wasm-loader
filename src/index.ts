@@ -39,11 +39,12 @@ export default function (this: webpack.loader.LoaderContext, content: string) {
     const args = ["build", "-o", outFile, ctx.resourcePath];
     const processOpts = {
       env: {
+        ...process.env,
         GOPATH: goPath,
         GOROOT: root,
         GOCACHE: join(__dirname, "./.gocache"),
         GOOS: "js",
-        GOARCH: "wasm"
+        GOARCH: "wasm",
       }
     };
 
