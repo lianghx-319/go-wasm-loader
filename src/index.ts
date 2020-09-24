@@ -9,18 +9,25 @@ export interface loaderOptions {
   root: string, // default process.env.GOROOT
   bridge: string, // file path of goBridge
   wasmExecPath: string, // wasm_exec.js path
+  goCompiler: GoCompiler,
   name?: string,
   outputPath?: string | ((url: string, resourcePath: string, context: string | boolean) => string),
+}
+
+export interface GoCompiler {
+  bin: (root: string) => string | string,
+  args: (resourcePath: string) => string[] | string[],
 }
 
 export default function (this: webpack.loader.LoaderContext, content: string) {
   const callback = this.async() as webpack.loader.loaderCallback;
   const copyWasmExecPath = join(__dirname, "../dist/wasm_exec.js");
 
-  ;(async function (ctx) {
+  ; (async function (ctx) {
     const [
       goPath,
       {
+        goCompiler: { bin, args },
         root,
         wasmExecPath,
         bridge,
@@ -35,8 +42,8 @@ export default function (this: webpack.loader.LoaderContext, content: string) {
     }
 
     const outFile = `${ctx.resourcePath}.wasm`;
-    const goBin = join(root, "bin/go");
-    const args = ["build", "-o", outFile, ctx.resourcePath];
+    const goBin = typeof bin === 'function' ? bin(root) : bin ;
+    const _args = typeof args === 'function' ? args(ctx.resourcePath): args;
     const processOpts = {
       env: {
         ...process.env,
@@ -66,7 +73,7 @@ export default function (this: webpack.loader.LoaderContext, content: string) {
     }
 
     try {
-      await compileWasm(goBin, args, processOpts)
+      await compileWasm(goBin, _args, processOpts)
     } catch (error) {
       console.trace(error);
       throw error;
@@ -99,12 +106,17 @@ export default function (this: webpack.loader.LoaderContext, content: string) {
 async function getLoaderOptions(context: webpack.loader.LoaderContext): Promise<loaderOptions & OptionObject> {
   const options = getOptions(context);
   const goRoot = await getGoEnv("GOROOT");
+  const goCompiler: GoCompiler = {
+    bin: (root: string) => join(root, "bin/go"),
+    args: (resourcePath: string) => ["build", "-o", `${resourcePath}.wasm`, resourcePath]
+  }
   return {
+    goCompiler,
     root: goRoot,
     wasmExecPath: resolve(goRoot, "misc/wasm/wasm_exec.js"),
     bridge: join(__dirname, "..", "dist", "gobridge.js"),
     ...options,
-  }
+  } as loaderOptions & OptionObject
 }
 
 function getGoEnv(name: string): Promise<string> {

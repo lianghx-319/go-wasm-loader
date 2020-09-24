@@ -36,8 +36,13 @@ module.exports = {
           {
             loader: path.join(__dirname, "..", "..", "dist", "index.js"),
             options: {
-              name: '[name].[contenthash:6].[ext]',
-              outputPath: 'static'
+              name: '[name].[contenthash:8].[ext]',
+              outputPath: 'static',
+              wasmExecPath: '/usr/local/Cellar/tinygo/0.15.0/targets/wasm_exec.js',
+              goCompiler: {
+                bin: '/usr/local/bin/tinygo',
+                args: (resourcePath) => ['build', '-o', `${resourcePath}.wasm`, '-target', 'wasm', resourcePath]
+              }
             }
           }
         ]

@@ -29,7 +29,6 @@ func err(this js.Value, args []js.Value) (interface{}, error) {
 
 func main() {
 	c := make(chan struct{}, 0)
-	println("Web Assembly is ready")
 	gobridge.RegisterCallback("add", add)
 	gobridge.RegisterCallback("raiseError", err)
 	gobridge.RegisterValue("someValue", "Hello World")
