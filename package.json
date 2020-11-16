@@ -1,6 +1,6 @@
 {
   "name": "@hanxx/go-wasm-loader",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0",
   "description": "Golang WebAssembly loader for webpack that generates an async pattern for working with Go's WebAssembly output",
   "homepage": "https://github.com/lianghx-319/go-wasm-loader",
   "publishConfig": {
