@@ -1,8 +1,9 @@
 import { join, resolve, posix } from "path";
 import { getOptions, interpolateName, OptionObject, stringifyRequest } from "loader-utils";
 import * as webpack from "webpack";
-import { readFileSync, unlinkSync, linkSync, existsSync } from "fs"
+import { readFileSync, unlinkSync, existsSync } from "fs"
 import { spawn, execFile } from "child_process"
+import { copyFile } from "./utils";
 // import validateOptions from "schema-utils"
 
 export interface loaderOptions {
@@ -38,7 +39,7 @@ export default function (this: webpack.loader.LoaderContext, content: string) {
     ] = await Promise.all([getGoEnv("GOPATH"), getLoaderOptions(ctx)])
 
     if (!existsSync(copyWasmExecPath)) {
-      linkSync(wasmExecPath, copyWasmExecPath);
+      copyFile(wasmExecPath, copyWasmExecPath);
     }
 
     const outFile = `${ctx.resourcePath}.wasm`;
